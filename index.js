@@ -31,6 +31,10 @@ const ProductSchema = new mongoose.Schema({
   deskripsi: String,
   rate: Number,
   category: String,
+  lokasi: String, // Tambahkan field baru
+  terjual: { type: Number, default: 0 }, // Tambahkan field baru dengan default 0
+  stok: { type: Number, default: 0 }, // Tambahkan field baru dengan default 0
+  type: String, // Tambahkan field baru
   createdat: { type: Date, default: Date.now },
   detailproduct: [
     {
@@ -71,6 +75,10 @@ app.post("/api/products", async (req, res) => {
       deskripsi,
       rate,
       category,
+      lokasi,
+      terjual,
+      stok,
+      type,
       detailproduct,
     } = req.body;
     const newProduct = new Product({
@@ -80,12 +88,16 @@ app.post("/api/products", async (req, res) => {
       deskripsi,
       rate,
       category,
+      lokasi,
+      terjual,
+      stok,
+      type,
       detailproduct,
       createdat: new Date(),
     });
 
     const savedProduct = await newProduct.save();
-    res.json(savedProduct);
+    res.json({ message: "Product created successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -100,6 +112,10 @@ app.put("/api/products/:id", async (req, res) => {
       deskripsi,
       rate,
       category,
+      lokasi,
+      terjual,
+      stok,
+      type,
       detailproduct,
     } = req.body;
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -111,6 +127,10 @@ app.put("/api/products/:id", async (req, res) => {
         deskripsi,
         rate,
         category,
+        lokasi,
+        terjual,
+        stok,
+        type,
         detailproduct,
       },
       { new: true }
@@ -120,7 +140,7 @@ app.put("/api/products/:id", async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json(updatedProduct);
+    res.json({ message: "Product updated successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -139,18 +159,8 @@ app.delete("/api/products/:id", async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json({ message: "Product deleted successfully" });
+    res.json({ message: "Product deleted successfully", deletedProduct });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
-
-async function generateId() {
-  try {
-    const latestProduct = await Product.findOne().sort({ id: -1 });
-    const newId = latestProduct ? latestProduct.id + 1 : 1;
-    return newId;
-  } catch (error) {
-    throw new Error("Error generating ID");
-  }
-}
